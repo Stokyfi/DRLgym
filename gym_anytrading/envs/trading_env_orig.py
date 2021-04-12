@@ -8,14 +8,16 @@ import matplotlib.pyplot as plt
 
 class Actions(Enum):
     Sell = 0
-    Nothing = 1
-    Buy = 2
+    Buy = 1
 
 
 class Positions(Enum):
     Short = 0
-    Exit = 1
-    Long = 2
+    Long = 1
+
+    def opposite(self):
+        return Positions.Short if self == Positions.Long else Positions.Long
+
 
 class TradingEnv(gym.Env):
 
@@ -47,6 +49,7 @@ class TradingEnv(gym.Env):
         self._first_rendering = None
         self.history = None
 
+        print('hi')
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -57,7 +60,7 @@ class TradingEnv(gym.Env):
         self._done = False
         self._current_tick = self._start_tick
         self._last_trade_tick = self._current_tick - 1
-        self._position = Positions.Exit
+        self._position = Positions.Short
         self._position_history = (self.window_size * [None]) + [self._position]
         self._total_reward = 0.
         self._total_profit = 1.  # unit
@@ -77,30 +80,14 @@ class TradingEnv(gym.Env):
         self._total_reward += step_reward
 
         self._update_profit(action)
-        
+
         trade = False
-
-        #buy from short (exit short) 
-        if (action == Actions.Buy.value and self._position == Positions.Short) : 
-            self._position = Positions.Exit
-            trade = True
-
-        #buy from exit (enter long)
-        elif (action == Actions.Buy.value and self._position == Positions.Exit) : 
-            self._position = Positions.Long
-            trade = True
-
-        #sell from long (exit long)
-        elif (action == Actions.Sell.value and self._position == Positions.Long) : 
-            self._position = Positions.Exit
-            trade = True
-
-        #sell from exit (enter short)
-        elif (action == Actions.Sell.value and self._position == Positions.Exit) : 
-            self._position = Positions.Short
+        if ((action == Actions.Buy.value and self._position == Positions.Short) or
+            (action == Actions.Sell.value and self._position == Positions.Long)):
             trade = True
 
         if trade:
+            self._position = self._position.opposite()
             self._last_trade_tick = self._current_tick
 
         self._position_history.append(self._position)
@@ -136,7 +123,7 @@ class TradingEnv(gym.Env):
             elif position == Positions.Long:
                 color = 'green'
             if color:
-                plt.scatter(tick, self.prices[tick], color=color, s=1)
+                plt.scatter(tick, self.prices[tick], color=color)
 
         if self._first_rendering:
             self._first_rendering = False
@@ -167,9 +154,9 @@ class TradingEnv(gym.Env):
             elif self._position_history[i] == Positions.Long:
                 long_ticks.append(tick)
 
-        plt.plot(short_ticks, self.prices[short_ticks], 'o', color='red', markersize=2, label='Short')
-        plt.plot(long_ticks, self.prices[long_ticks], 'o', color='green', markersize=2, label='Long')
-        plt.legend()
+        plt.plot(short_ticks, self.prices[short_ticks], 'ro')
+        plt.plot(long_ticks, self.prices[long_ticks], 'go')
+
         plt.suptitle(
             "Total Reward: %.6f" % self._total_reward + ' ~ ' +
             "Total Profit: %.6f" % self._total_profit
