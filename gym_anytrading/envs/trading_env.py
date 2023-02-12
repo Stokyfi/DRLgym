@@ -32,7 +32,7 @@ class TradingEnv(gym.Env):
 
         # spaces
         self.action_space = spaces.Discrete(len(Actions))
-        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=self.shape, dtype=np.float32)
+        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=self.shape, dtype=np.float64)
 
         # episode
         self._start_tick = self.window_size
@@ -77,26 +77,26 @@ class TradingEnv(gym.Env):
         self._total_reward += step_reward
 
         self._update_profit(action)
-        
+
         trade = False
 
-        #buy from short (exit short) 
-        if (action == Actions.Buy.value and self._position == Positions.Short) : 
+        #buy from short (exit short)
+        if (action == Actions.Buy.value and self._position == Positions.Short) :
             self._position = Positions.Exit
             trade = True
 
         #buy from exit (enter long)
-        elif (action == Actions.Buy.value and self._position == Positions.Exit) : 
+        elif (action == Actions.Buy.value and self._position == Positions.Exit) :
             self._position = Positions.Long
             trade = True
 
         #sell from long (exit long)
-        elif (action == Actions.Sell.value and self._position == Positions.Long) : 
+        elif (action == Actions.Sell.value and self._position == Positions.Long) :
             self._position = Positions.Exit
             trade = True
 
         #sell from exit (enter short)
-        elif (action == Actions.Sell.value and self._position == Positions.Exit) : 
+        elif (action == Actions.Sell.value and self._position == Positions.Exit) :
             self._position = Positions.Short
             trade = True
 
@@ -116,7 +116,8 @@ class TradingEnv(gym.Env):
 
 
     def _get_observation(self):
-        return self.signal_features[(self._current_tick-self.window_size):self._current_tick]
+
+        return self.signal_features[(self._current_tick-self.window_size+1):self._current_tick+1]
 
 
     def _update_history(self, info):
@@ -174,8 +175,8 @@ class TradingEnv(gym.Env):
             "Total Reward: %.6f" % self._total_reward + ' ~ ' +
             "Total Profit: %.6f" % self._total_profit
         )
-        
-        
+
+
     def close(self):
         plt.close()
 
