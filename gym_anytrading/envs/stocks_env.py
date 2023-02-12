@@ -1,7 +1,8 @@
 import numpy as np
 
 from .trading_env import TradingEnv, Actions, Positions
-
+from sklearn import preprocessing, model_selection, feature_selection, ensemble, linear_model, metrics, decomposition
+import pandas as pd
 
 class StocksEnv(TradingEnv):
 
@@ -21,10 +22,13 @@ class StocksEnv(TradingEnv):
         prices[self.frame_bound[0] - self.window_size]  # validate index (TODO: Improve validation)
         prices = prices[self.frame_bound[0]-self.window_size:self.frame_bound[1]]
 
-        diff = np.insert(np.diff(prices), 0, 0)
+        diff = np.insert(np.diff(prices/100), 0, 0)
         signal_features = np.column_stack((prices, diff))
+        #normalizing it
+        min_max_scaler = preprocessing.MinMaxScaler(feature_range=(0,1))
+        signal_features_norm = min_max_scaler.fit_transform(signal_features)
 
-        return prices, signal_features
+        return prices, signal_features_norm
 
 
     def _calculate_reward(self, action):

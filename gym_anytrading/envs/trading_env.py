@@ -168,8 +168,8 @@ class TradingEnv(gym.Env):
             elif self._position_history[i] == Positions.Long:
                 long_ticks.append(tick)
 
-        plt.plot(short_ticks, self.prices[short_ticks], 'o', color='red', markersize=2, label='Short')
-        plt.plot(long_ticks, self.prices[long_ticks], 'o', color='green', markersize=2, label='Long')
+        plt.plot(short_ticks, self.prices[short_ticks], 'o', color='red', markersize=10, label='Short')
+        plt.plot(long_ticks, self.prices[long_ticks], 'o', color='green', markersize=10, label='Long')
         plt.legend()
         plt.suptitle(
             "Total Reward: %.6f" % self._total_reward + ' ~ ' +
