@@ -53,7 +53,7 @@ class TradingEnv(gym.Env):
         return [seed]
 
 
-    def reset(self):
+    def reset(self, seed=None):
         self._done = False
         self._current_tick = self._start_tick
         self._last_trade_tick = self._current_tick - 1
@@ -63,6 +63,7 @@ class TradingEnv(gym.Env):
         self._total_profit = 1.  # unit
         self._first_rendering = True
         self.history = {}
+        self.np_random, seed = seeding.np_random(seed)
         return self._get_observation()
 
 
