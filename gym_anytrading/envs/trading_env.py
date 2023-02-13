@@ -33,7 +33,7 @@ class TradingEnv(gym.Env):
         # spaces
         self.action_space = spaces.Discrete(len(Actions))
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=self.shape, dtype=np.float64)
-        self.positionspace_logs = {0:'Short', 1: 'Exit', 2:'Long'}
+        
         # episode
         self._start_tick = self.window_size
         self._end_tick = len(self.prices) - 1
@@ -109,7 +109,7 @@ class TradingEnv(gym.Env):
         info = dict(
             total_reward = self._total_reward,
             total_profit = self._total_profit,
-            position = self.positionspace_logs[self._position.value]
+            position = self._position.value
         )
         self._update_history(info)
 
