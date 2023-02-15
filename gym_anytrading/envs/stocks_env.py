@@ -6,10 +6,11 @@ import pandas as pd
 
 class StocksEnv(TradingEnv):
 
-    def __init__(self, df, window_size, frame_bound):
+    def __init__(self, df, window_size, frame_bound, features=['Close']):
         assert len(frame_bound) == 2
 
         self.frame_bound = frame_bound
+        self.features = features
         super().__init__(df, window_size)
 
         self.trade_fee_bid_percent = 0.01  # unit
@@ -17,7 +18,7 @@ class StocksEnv(TradingEnv):
 
 
     def _process_data(self):
-        prices = self.df.loc[:, 'Close'].to_numpy()
+        prices = self.df.loc[:, self.features].to_numpy()
 
         prices[self.frame_bound[0] - self.window_size]  # validate index (TODO: Improve validation)
         prices = prices[self.frame_bound[0]-self.window_size:self.frame_bound[1]]
