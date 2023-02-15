@@ -6,11 +6,12 @@ import pandas as pd
 
 class StocksEnv(TradingEnv):
 
-    def __init__(self, df, window_size, frame_bound, features=None):
+    def __init__(self, df, window_size, frame_bound, features=None, Normalize=True):
         assert len(frame_bound) == 2
 
         self.frame_bound = frame_bound
         self.features = features
+        self.Normalize = Normalize
         super().__init__(df, window_size)
 
         self.trade_fee_bid_percent = 0.01  # unit
@@ -34,9 +35,10 @@ class StocksEnv(TradingEnv):
 
         #normalizing it
         min_max_scaler = preprocessing.MinMaxScaler(feature_range=(0,1))
-        signal_features_norm = min_max_scaler.fit_transform(signal_features)
+        if self.Normalize:
+            signal_features = min_max_scaler.fit_transform(signal_features)
 
-        return prices, signal_features_norm
+        return prices, signal_features
 
 
     def _calculate_reward(self, action):
