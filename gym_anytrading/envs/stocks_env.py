@@ -6,7 +6,7 @@ import pandas as pd
 
 class StocksEnv(TradingEnv):
 
-    def __init__(self, df, window_size, frame_bound, features=['Close']):
+    def __init__(self, df, window_size, frame_bound, features=None):
         assert len(frame_bound) == 2
 
         self.frame_bound = frame_bound
@@ -18,14 +18,20 @@ class StocksEnv(TradingEnv):
 
 
     def _process_data(self):
-        prices = self.df[self.features].to_numpy()
-
-        prices[self.frame_bound[0] - self.window_size]  # validate index (TODO: Improve validation)
+        prices = self.df.loc[:, 'Close'].to_numpy()
         prices = prices[self.frame_bound[0]-self.window_size:self.frame_bound[1]]
 
-        diff = np.insert(np.diff(prices/100), 0, 0)
-        # Add Ta features here
-        signal_features = np.column_stack((prices, diff))
+        if self.features is not None:
+            signal_features = self.df[self.features].to_numpy() [self.frame_bound[0]-self.window_size:self.frame_bound[1]]
+        else:
+            diff = np.insert(np.diff(prices/100), 0, 0)
+            # Add Ta features here
+            signal_features = np.column_stack((prices, diff))
+
+        prices[self.frame_bound[0] - self.window_size]  # validate index (TODO: Improve validation)
+
+
+
         #normalizing it
         min_max_scaler = preprocessing.MinMaxScaler(feature_range=(0,1))
         signal_features_norm = min_max_scaler.fit_transform(signal_features)
