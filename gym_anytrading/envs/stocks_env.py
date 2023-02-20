@@ -31,8 +31,6 @@ class StocksEnv(TradingEnv):
 
         prices[self.frame_bound[0] - self.window_size]  # validate index (TODO: Improve validation)
 
-
-
         #normalizing it
         min_max_scaler = preprocessing.MinMaxScaler(feature_range=(0,1))
         if self.Normalize:
@@ -58,8 +56,8 @@ class StocksEnv(TradingEnv):
                 step_reward += price_diff
 
 # Add short to the reward . If short buy (current_price) should be lower than sell(last_trade_price)
-            if self._position == Positions.Short:
-                step_reward = step_reward + (-1 * price_diff)
+#            if self._position == Positions.Short:
+#                step_reward = step_reward + (-1 * price_diff)
 
         return step_reward
 
