@@ -57,6 +57,10 @@ class StocksEnv(TradingEnv):
             if self._position == Positions.Long:
                 step_reward += price_diff
 
+# Add short to the reward . If short buy (current_price) should be lower than sell(last_trade_price)
+            if self._position == Positions.Short:
+                step_reward = step_reward + (-1 * price_diff)
+
         return step_reward
 
 
