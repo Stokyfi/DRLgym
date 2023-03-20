@@ -23,6 +23,8 @@ class StocksEnv(TradingEnv):
         prices = prices[self.frame_bound[0]-self.window_size:self.frame_bound[1]]
 
         if self.features is not None:
+            print("Features were provided as below:")
+            print(self.features)
             signal_features = self.df[self.features].to_numpy() [self.frame_bound[0]-self.window_size:self.frame_bound[1]]
         else:
             diff = np.insert(np.diff(prices/100), 0, 0)
