@@ -27,6 +27,7 @@ class StocksEnv(TradingEnv):
             print(self.features)
             signal_features = self.df[self.features].to_numpy() [self.frame_bound[0]-self.window_size:self.frame_bound[1]]
         else:
+            print("No feature was provided")
             diff = np.insert(np.diff(prices/100), 0, 0)
             # Add Ta features here
             signal_features = np.column_stack((prices, diff))
