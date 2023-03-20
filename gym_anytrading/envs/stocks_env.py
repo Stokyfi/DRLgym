@@ -38,6 +38,8 @@ class StocksEnv(TradingEnv):
         min_max_scaler = preprocessing.MinMaxScaler(feature_range=(0,1))
         if self.Normalize:
             signal_features = min_max_scaler.fit_transform(signal_features)
+            signal_features[~np.isfinite(signal_features)] = -1
+
 
         return prices, signal_features
 
