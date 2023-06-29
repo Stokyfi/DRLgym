@@ -6,12 +6,13 @@ import pandas as pd
 
 class StocksEnv(TradingEnv):
 
-    def __init__(self, df, window_size, frame_bound, features=None, Normalize=True):
+    def __init__(self, df, window_size, frame_bound, features=None, Normalize=True, stop_loss_pct=0.05):
         assert len(frame_bound) == 2
 
         self.frame_bound = frame_bound
         self.features = features
         self.Normalize = Normalize
+        self.stop_loss_pct = stop_loss_pct  # stop loss percentage
         super().__init__(df, window_size)
 
         self.trade_fee_bid_percent = 0.01  # unit

@@ -74,32 +74,49 @@ class TradingEnv(gym.Env):
         if self._current_tick == self._end_tick:
             self._done = True
 
+        # Stop-loss check for both Long and Short positions
+        current_price = self.prices[self._current_tick]
+        last_trade_price = self.prices[self._last_trade_tick]
+        
+        trade = False
+        
+        # If in Long position, stop loss when price drops below a threshold
+        if self._position == Positions.Long and last_trade_price * (1 - self.stop_loss_pct) > current_price:
+            action = Actions.Sell.value  # enforce stop loss
+            self._position = Positions.Exit
+            trade = True
+        # If in Short position, stop loss when price rises above a threshold
+        elif self._position == Positions.Short and last_trade_price * (1 + self.stop_loss_pct) < current_price:
+            action = Actions.Buy.value  # enforce stop loss
+            self._position = Positions.Exit
+            trade = True
+        
         step_reward = self._calculate_reward(action)
         self._total_reward += step_reward
 
         self._update_profit(action)
 
-        trade = False
+    # If a stop loss wasn't already triggered, check the agent's action
+        if not trade: 
+            #buy from short (exit short)
+            if (action == Actions.Buy.value and self._position == Positions.Short) :
+                self._position = Positions.Exit
+                trade = True
 
-        #buy from short (exit short)
-        if (action == Actions.Buy.value and self._position == Positions.Short) :
-            self._position = Positions.Exit
-            trade = True
+            #buy from exit (enter long)
+            elif (action == Actions.Buy.value and self._position == Positions.Exit) :
+                self._position = Positions.Long
+                trade = True
 
-        #buy from exit (enter long)
-        elif (action == Actions.Buy.value and self._position == Positions.Exit) :
-            self._position = Positions.Long
-            trade = True
+            #sell from long (exit long)
+            elif (action == Actions.Sell.value and self._position == Positions.Long) :
+                self._position = Positions.Exit
+                trade = True
 
-        #sell from long (exit long)
-        elif (action == Actions.Sell.value and self._position == Positions.Long) :
-            self._position = Positions.Exit
-            trade = True
-
-        #sell from exit (enter short)
-        elif (action == Actions.Sell.value and self._position == Positions.Exit) :
-            self._position = Positions.Short
-            trade = True
+            #sell from exit (enter short)
+            elif (action == Actions.Sell.value and self._position == Positions.Exit) :
+                self._position = Positions.Short
+                trade = True
 
         if trade:
             self._last_trade_tick = self._current_tick
