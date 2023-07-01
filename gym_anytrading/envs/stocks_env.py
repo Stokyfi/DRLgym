@@ -85,13 +85,13 @@ class StocksEnv(TradingEnv):
                 shares = (self._total_profit * (1 - self.trade_fee_ask_percent)) / last_trade_price
                 # calculate profit from selling the shares
                 profit = (shares * (1 - self.trade_fee_bid_percent)) * current_price
-                self._total_profit += profit
+                self._total_profit += (profit-1)
 
 # reflecting the effect of the trade on the share size basically
             if self._position == Positions.Short:
                 shares_sold = (self._total_profit * (1 - self.trade_fee_ask_percent)) / last_trade_price
                 profit = ((last_trade_price/current_price) * shares_sold * (1 - self.trade_fee_bid_percent)) * last_trade_price
-                self._total_profit += profit
+                self._total_profit += (profit-1)
 
     def max_possible_profit(self):
         current_tick = self._start_tick
