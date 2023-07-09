@@ -7,3 +7,5 @@ venv*/
 dist/
 *.egg-info/
 build/
+.aider.chat.history.md
+.aider.input.history
