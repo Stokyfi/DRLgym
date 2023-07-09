@@ -46,6 +46,7 @@ class TradingEnv(gym.Env):
         self._total_profit = None
         self._first_rendering = None
         self.history = None
+        self.trades = {'open': [], 'close': []}
 
 
     def seed(self, seed=None):
@@ -63,6 +64,7 @@ class TradingEnv(gym.Env):
         self._total_profit = 1.  # unit
         self._first_rendering = True
         self.history = {}
+        self.trades = {'open': [], 'close': []}
         self.np_random, seed = seeding.np_random(seed)
         return self._get_observation()
 
@@ -96,27 +98,31 @@ class TradingEnv(gym.Env):
 
         self._update_profit(action)
 
-    # If a stop loss wasn't already triggered, check the agent's action
+        # If a stop loss wasn't already triggered, check the agent's action
         if not trade: 
-            #buy from short (exit short)
-            if (action == Actions.Buy.value and self._position == Positions.Short) :
+            # Buy from short (exit short)
+            if action == Actions.Buy.value and self._position == Positions.Short:
                 self._position = Positions.Exit
                 trade = True
+                self.trades['close'].append((self._current_tick, current_price))
 
-            #buy from exit (enter long)
-            elif (action == Actions.Buy.value and self._position == Positions.Exit) :
+            # Buy from exit (enter long)
+            elif action == Actions.Buy.value and self._position == Positions.Exit:
                 self._position = Positions.Long
                 trade = True
+                self.trades['open'].append((self._current_tick, current_price))
 
-            #sell from long (exit long)
-            elif (action == Actions.Sell.value and self._position == Positions.Long) :
+            # Sell from long (exit long)
+            elif action == Actions.Sell.value and self._position == Positions.Long:
                 self._position = Positions.Exit
                 trade = True
+                self.trades['close'].append((self._current_tick, current_price))
 
-            #sell from exit (enter short)
-            elif (action == Actions.Sell.value and self._position == Positions.Exit) :
+            # Sell from exit (enter short)
+            elif action == Actions.Sell.value and self._position == Positions.Exit:
                 self._position = Positions.Short
                 trade = True
+                self.trades['open'].append((self._current_tick, current_price))
 
         if trade:
             self._last_trade_tick = self._current_tick
@@ -124,9 +130,9 @@ class TradingEnv(gym.Env):
         self._position_history.append(self._position)
         observation = self._get_observation()
         info = dict(
-            total_reward = self._total_reward,
-            total_profit = self._total_profit,
-            position = self._position.value
+            total_reward=self._total_reward,
+            total_profit=self._total_profit,
+            position=self._position.value
         )
         self._update_history(info)
 
@@ -134,8 +140,7 @@ class TradingEnv(gym.Env):
 
 
     def _get_observation(self):
-
-        return self.signal_features[(self._current_tick-self.window_size+1):self._current_tick+1]
+        return self.signal_features[(self._current_tick - self.window_size + 1):self._current_tick + 1]
 
 
     def _update_history(self, info):
@@ -147,7 +152,6 @@ class TradingEnv(gym.Env):
 
 
     def render(self, mode='human'):
-
         def _plot_position(position, tick):
             color = None
             if position == Positions.Short:
