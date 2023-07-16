@@ -33,13 +33,19 @@ class StocksEnv(TradingEnv):
             # Add Ta features here
             signal_features = np.column_stack((prices, diff))
 
-        prices[self.frame_bound[0] - self.window_size]  # validate index (TODO: Improve validation)
+        #prices[self.frame_bound[0] - self.window_size]  # validate index (TODO: Improve validation)
 
         #normalizing it
-        min_max_scaler = preprocessing.MinMaxScaler(feature_range=(0,1))
+        #min_max_scaler = preprocessing.MinMaxScaler(feature_range=(0,1))
         if self.Normalize:
-            signal_features = min_max_scaler.fit_transform(signal_features)
+            # Normalize each column based on the first element
+            #This will give a normalized version of each feature 
+            # where the first element is now 0 (since x/x - 1 = 0) and all other elements represent the proportional change compared to the first element.
+            signal_features = signal_features / signal_features[0, :] - 1
+            # Replace any non-finite values with -1
             signal_features[~np.isfinite(signal_features)] = -1
+            #signal_features = min_max_scaler.fit_transform(signal_features)
+            #signal_features[~np.isfinite(signal_features)] = -1
 
 
         return prices, signal_features

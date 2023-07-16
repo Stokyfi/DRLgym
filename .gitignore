@@ -9,3 +9,4 @@ dist/
 build/
 .aider.chat.history.md
 .aider.input.history
+__pycache__
