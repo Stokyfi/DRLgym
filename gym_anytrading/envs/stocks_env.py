@@ -42,10 +42,9 @@ class StocksEnv(TradingEnv):
             #This will give a normalized version of each feature 
             # where the first element is now 0 (since x/x - 1 = 0) and all other elements represent the proportional change compared to the first element.
             signal_features = signal_features / signal_features[0, :] - 1
-            # Replace any non-finite values with -1
-            signal_features[~np.isfinite(signal_features)] = -1
             #signal_features = min_max_scaler.fit_transform(signal_features)
-            #signal_features[~np.isfinite(signal_features)] = -1
+            
+        signal_features[~np.isfinite(signal_features)] = -1
 
 
         return prices, signal_features
